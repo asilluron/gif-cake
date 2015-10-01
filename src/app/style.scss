@@ -1,0 +1,73 @@
+body {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    -webkit-app-region: drag;
+    background-color: #343838;
+    color: #FFF;
+    margin: 0px;
+    padding: 0px;
+    overflow:hidden;
+}
+
+input {
+    border: 0;
+    color: #FFF;
+    font-size:48px;
+    width: 550px;
+    text-align:center;
+    outline: none;
+    background-size: 125px;
+}
+
+.notice {
+    text-align: center;
+    position: relative;
+}
+
+.image-wrapper {
+  width: 200px;
+  height: 150px;
+  float: left;
+  overflow: hidden;
+}
+img {
+    display:block;
+    margin: 0 auto;
+    max-width: 200px;
+    height: 100%;
+}
+
+.scene {
+    height: 200px;
+    width: 100%;
+}
+
+.loader {
+    height: 400px;
+    text-align: center;
+    vertical-align: middle;
+    width: 600px;
+}
+
+.loader img {
+    display:block;
+    margin: 0 auto;
+    max-width: 25px;
+    height: 25px;
+}
+
+
+.help--browsing{
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.help {
+    position: fixed;
+    left: 20px;
+    top: 45px;
+    font-size: 12px;
+    opacity: 0.5;
+}
