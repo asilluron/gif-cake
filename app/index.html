@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gif Cake</title>
+
+  <style type="text/css">
+    input
+  {
+    background:url(giphy.png) no-repeat right bottom;
+  }
+
+  [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+  }
+  </style>
+
+
+  </head>
+  <body ng-cloak ng-controller="SearchCtrl as search" ng-keydown="search.keydown($event)">
+
+    <input id="term" ng-hide="search.browsing" ng-model="search.term" autofocus dr-focus browsing="{{search.browsing}}" type="text">
+
+    <div ng-show="search.browsing && search.loading" class="loader">
+      <img src="loader.gif">
+    </div>
+
+    <div ng-show="search.browsing && !search.loading && !search.noresults" class="scene">
+      <div class="image-wrapper" ng-repeat="gif in search.gifs">
+        <img ng-click="search.setClipboard(gif)" ng-src="{{gif}}">
+      </div>
+    </div>
+
+    <div ng-show="search.browsing && !search.loading && search.noresults" class="scene">
+      <h2 class="notice">No Results Found</h2>
+    </div>
+
+    <div ng-hide="search.browsing" class="help">Press enter to preview.</div>
+    <div ng-show="search.browsing" class="help--browsing">Press tab to skip. Click to copy. Any key to search again.</div>
+
+
+    <script src="bootstrap.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-resource.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+    <script src="app.js"></script>
+    <script src="config.js"></script>
+    <script type="text/javascript">
+      angular.element(document).ready(function () {
+        angular.bootstrap(document, ['pi']);
+      });
+    </script>
+
+  </body>
+</html>
