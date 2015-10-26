@@ -29,3 +29,6 @@ node_modules
 # nwjs builder
 cache
 
+# Private config
+app/config.js
+
