@@ -21,16 +21,18 @@
     <input id="term" ng-hide="search.browsing" ng-model="search.term" autofocus dr-focus browsing="{{search.browsing}}" type="text">
 
     <div ng-show="search.browsing && search.loading" class="loader">
+      <br>
       <img src="loader.gif">
     </div>
 
     <div ng-show="search.browsing && !search.loading && !search.noresults" class="scene">
-      <div class="image-wrapper" ng-repeat="gif in search.gifs">
+      <div class="image-wrapper" ng-repeat="gif in search.gifs track by $index">
         <img ng-click="search.setClipboard(gif)" ng-src="{{gif}}">
       </div>
     </div>
 
     <div ng-show="search.browsing && !search.loading && search.noresults" class="scene">
+      <br>
       <h2 class="notice">No Results Found</h2>
     </div>
 
