@@ -31,6 +31,8 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
           //Skip to next image
           if (_self.noresults === false) {
             //Don't allow a new search if know it's a dud
+            _self.gifs = [];
+            gifMap = new Map();
             search(this.lastTerm);
           }
         }
@@ -60,6 +62,7 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
   };
 
   function reset() {
+    gifMap = new Map();
     _self.browsing = false;
     _self.gifs = [];
     _self.noresults = false;
@@ -80,7 +83,6 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
         if (resp.data.images) {
           let dupeCheck = gifMap.get(resp.data.images.fixed_height_small.url);
           if (typeof dupeCheck === 'undefined') {
-            _self.noresults = false;
             resolveCount++;
             _self.gifs = _self.gifs.concat([resp.data.images.fixed_height_small.url]);
             gifMap.set(resp.data.images.fixed_height_small.url, resp.data.images.original.url);
@@ -92,6 +94,12 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
     }
 
     $q.all(translatePromises).finally(() => {
+      if(resolveCount === 0) {
+        _self.noresults = true;
+      }
+      else{
+        _self.noresults = false;
+      }
       for (let j = (6 - resolveCount); j > 0; j--) {
         _self.gifs = _self.gifs.concat([PLACEHOLDER_IMAGE]);
       }

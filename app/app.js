@@ -163,6 +163,8 @@
 	          //Skip to next image
 	          if (_self.noresults === false) {
 	            //Don't allow a new search if know it's a dud
+	            _self.gifs = [];
+	            gifMap = new Map();
 	            search(_this.lastTerm);
 	          }
 	        }
@@ -192,6 +194,7 @@
 	  };
 
 	  function reset() {
+	    gifMap = new Map();
 	    _self.browsing = false;
 	    _self.gifs = [];
 	    _self.noresults = false;
@@ -212,7 +215,6 @@
 	        if (resp.data.images) {
 	          var dupeCheck = gifMap.get(resp.data.images.fixed_height_small.url);
 	          if (typeof dupeCheck === 'undefined') {
-	            _self.noresults = false;
 	            resolveCount++;
 	            _self.gifs = _self.gifs.concat([resp.data.images.fixed_height_small.url]);
 	            gifMap.set(resp.data.images.fixed_height_small.url, resp.data.images.original.url);
@@ -224,6 +226,11 @@
 	    }
 
 	    $q.all(translatePromises)['finally'](function () {
+	      if (resolveCount === 0) {
+	        _self.noresults = true;
+	      } else {
+	        _self.noresults = false;
+	      }
 	      for (var j = 6 - resolveCount; j > 0; j--) {
 	        _self.gifs = _self.gifs.concat([PLACEHOLDER_IMAGE]);
 	      }
