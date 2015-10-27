@@ -31,4 +31,5 @@ cache
 
 # Private config
 app/config.js
+token
 
