@@ -1,16 +1,14 @@
 {
   "name": "gif-cake",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Fast gifs now powered by Giphy. Favorites list, custom filters and more.",
   "main": "index.html",
   "window": {
     "title": "Gif Cake",
     "frame": false,
-    "toolbar": false,
     "width": 600,
     "height": 300,
     "resizable": false,
-    "always-on-top": true,
     "position": "center",
     "show_in_taskbar": false
   },
@@ -39,11 +37,5 @@
   "bugs": {
     "url": "https://github.com/asilluron/gif-cake/issues"
   },
-  "homepage": "https://github.com/asilluron/gif-cake#readme",
-  "devDependencies": {
-    "gulp": "^3.9.0",
-    "gulp-gzip": "^1.2.0",
-    "gulp-tar": "^1.4.0",
-    "nw-builder": "^2.0.2"
-  }
+  "homepage": "https://github.com/asilluron/gif-cake#readme"
 }

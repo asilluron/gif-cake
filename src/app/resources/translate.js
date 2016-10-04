@@ -6,4 +6,4 @@ var translateResource = function ($resource, API_KEY, API_URL) {
 
 translateResource.$inject = ['$resource', 'API_KEY', 'API_URL'];
 
-export default translateResource;
+module.exports = translateResource;

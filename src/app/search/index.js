@@ -1,6 +1,8 @@
+'use strict';
+
 var piApp = angular.module('pi.search', []);
 
-piApp.controller('SearchCtrl', function (translateResource, $q) {
+piApp.controller('SearchCtrl', function (translateResource, $q, $scope, $timeout) {
   var _self = this;
   const PLACEHOLDER_IMAGE = 'https://placeholdit.imgix.net/~text?txtsize=33&txt=No%20Result&w=200&h=150';
   var gifMap = new Map();
@@ -10,11 +12,22 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
   this.error = null;
   this.gifs = [];
   this.lastTerm = '';
-  this.noresults = false; //No Results flag
+  this.noresults = false; // No Results flag
+  this.copied = false;
 
-  //TODO: Abstract NWJS utils into a service
-  var clipboard = typeof gui !== 'undefined' ? gui.Clipboard.get() : {
+  // TODO: Abstract NWJS utils into a service
+  var clipboard = typeof nw !== 'undefined' ? nw.Clipboard.get() : {
     set: n => {
+    }
+  };
+
+  var reset = lastChar => {
+    gifMap = new Map();
+    _self.browsing = false;
+    _self.gifs = [];
+    _self.noresults = false;
+    if (lastChar) {
+      this.term = lastChar;
     }
   };
 
@@ -26,11 +39,11 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
         reset();
         break;
       case 9:
-        //We got a tab
+        // We got a tab
         if (this.browsing) {
-          //Skip to next image
+          // Skip to next image
           if (_self.noresults === false) {
-            //Don't allow a new search if know it's a dud
+            // Don't allow a new search if know it's a dud
             _self.gifs = [];
             gifMap = new Map();
             search(this.lastTerm);
@@ -39,7 +52,7 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
         break;
       case 13:
         if (!this.browsing) {
-          //Begin the search !
+          // Begin the search !
           this.browsing = true;
           search(this.term);
           this.lastTerm = this.term;
@@ -47,28 +60,22 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
         }
         break;
       default:
-        if (this.browsing === true) {
-          reset();
+        if (this.browsing === true && /[a-zA-Z0-9-_ ]/.test(e.key)) {
+          reset(e.key);
         }
     }
   };
 
-  this.setClipboard = function (urlSmall) {
+  this.setClipboard = urlSmall => {
     var originalUrl = gifMap.get(urlSmall);
     clipboard.set(originalUrl, 'text');
-    //TODO: Make this test safe
-    win.hide();
-    reset();
+    this.copied = true;
+    $timeout(() => {
+      this.copied = false;
+    }, 1500);
   };
 
-  function reset() {
-    gifMap = new Map();
-    _self.browsing = false;
-    _self.gifs = [];
-    _self.noresults = false;
-  }
-
-  function search(term) {
+  function search (term) {
     _self.loading = true;
     let translatePromises = [],
       resolveCount = 0;
@@ -89,15 +96,14 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
           }
         }
       }, err => {
-        _self.error = 'Problem contacting Giphy, Please Try Again'; //TODO: i18n THIS
+        _self.error = 'Problem contacting Giphy, Please Try Again'; // TODO: i18n THIS
       });
     }
 
     $q.all(translatePromises).finally(() => {
-      if(resolveCount === 0) {
+      if (resolveCount === 0) {
         _self.noresults = true;
-      }
-      else{
+      } else {
         _self.noresults = false;
       }
       for (let j = (6 - resolveCount); j > 0; j--) {
@@ -110,4 +116,4 @@ piApp.controller('SearchCtrl', function (translateResource, $q) {
 
 });
 
-export default piApp;
+module.exports = piApp;

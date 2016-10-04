@@ -44,16 +44,8 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-
 	__webpack_require__(1);
-
 	__webpack_require__(3);
-
 	__webpack_require__(4);
 
 	var app = angular.module('pi', ['pi.search', 'pi.resources']);
@@ -63,7 +55,7 @@
 	    scope: {
 	      trigger: '@browsing'
 	    },
-	    link: function link(scope, element) {
+	    link: function (scope, element) {
 	      scope.$watch('trigger', function (value) {
 	        if (value === 'false') {
 	          $timeout(function () {
@@ -75,41 +67,22 @@
 	  };
 	});
 
-	exports['default'] = app;
-	module.exports = exports['default'];
-
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _translate = __webpack_require__(2);
-
-	var _translate2 = _interopRequireDefault(_translate);
+	var translateResource = __webpack_require__(2);
 
 	var resources = angular.module('pi.resources', ['ngResource']);
-	resources.service('translateResource', _translate2['default']);
+	resources.service('translateResource', translateResource);
 
-	exports['default'] = resources;
-	module.exports = exports['default'];
+	module.exports = resources;
 
 /***/ },
 /* 2 */
 /***/ function(module, exports) {
 
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-	var translateResource = function translateResource($resource, API_KEY, API_URL) {
+	var translateResource = function ($resource, API_KEY, API_URL) {
 	  return $resource(API_URL + '/translate', {
 	    api_key: API_KEY
 	  });
@@ -117,8 +90,7 @@
 
 	translateResource.$inject = ['$resource', 'API_KEY', 'API_URL'];
 
-	exports['default'] = translateResource;
-	module.exports = exports['default'];
+	module.exports = translateResource;
 
 /***/ },
 /* 3 */
@@ -126,16 +98,11 @@
 
 	'use strict';
 
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
 	var piApp = angular.module('pi.search', []);
 
-	piApp.controller('SearchCtrl', function (translateResource, $q) {
-	  var _this = this;
-
+	piApp.controller('SearchCtrl', function (translateResource, $q, $scope, $timeout) {
 	  var _self = this;
-	  var PLACEHOLDER_IMAGE = 'https://placeholdit.imgix.net/~text?txtsize=33&txt=No%20Result&w=200&h=150';
+	  const PLACEHOLDER_IMAGE = 'https://placeholdit.imgix.net/~text?txtsize=33&txt=No%20Result&w=200&h=150';
 	  var gifMap = new Map();
 	  this.browsing = false;
 	  this.loading = true;
@@ -143,14 +110,25 @@
 	  this.error = null;
 	  this.gifs = [];
 	  this.lastTerm = '';
-	  this.noresults = false; //No Results flag
+	  this.noresults = false; // No Results flag
+	  this.copied = false;
 
-	  //TODO: Abstract NWJS utils into a service
-	  var clipboard = typeof gui !== 'undefined' ? gui.Clipboard.get() : {
-	    set: function set(n) {}
+	  // TODO: Abstract NWJS utils into a service
+	  var clipboard = typeof nw !== 'undefined' ? nw.Clipboard.get() : {
+	    set: n => {}
 	  };
 
-	  this.keydown = function (e) {
+	  var reset = lastChar => {
+	    gifMap = new Map();
+	    _self.browsing = false;
+	    _self.gifs = [];
+	    _self.noresults = false;
+	    if (lastChar) {
+	      this.term = lastChar;
+	    }
+	  };
+
+	  this.keydown = e => {
 
 	    switch (e.keyCode) {
 	      case 27:
@@ -158,80 +136,74 @@
 	        reset();
 	        break;
 	      case 9:
-	        //We got a tab
-	        if (_this.browsing) {
-	          //Skip to next image
+	        // We got a tab
+	        if (this.browsing) {
+	          // Skip to next image
 	          if (_self.noresults === false) {
-	            //Don't allow a new search if know it's a dud
+	            // Don't allow a new search if know it's a dud
 	            _self.gifs = [];
 	            gifMap = new Map();
-	            search(_this.lastTerm);
+	            search(this.lastTerm);
 	          }
 	        }
 	        break;
 	      case 13:
-	        if (!_this.browsing) {
-	          //Begin the search !
-	          _this.browsing = true;
-	          search(_this.term);
-	          _this.lastTerm = _this.term;
-	          _this.term = '';
+	        if (!this.browsing) {
+	          // Begin the search !
+	          this.browsing = true;
+	          search(this.term);
+	          this.lastTerm = this.term;
+	          this.term = '';
 	        }
 	        break;
 	      default:
-	        if (_this.browsing === true) {
-	          reset();
+	        if (this.browsing === true && /[a-zA-Z0-9-_ ]/.test(e.key)) {
+	          reset(e.key);
 	        }
 	    }
 	  };
 
-	  this.setClipboard = function (urlSmall) {
+	  this.setClipboard = urlSmall => {
 	    var originalUrl = gifMap.get(urlSmall);
 	    clipboard.set(originalUrl, 'text');
-	    //TODO: Make this test safe
-	    win.hide();
-	    reset();
+	    this.copied = true;
+	    $timeout(() => {
+	      this.copied = false;
+	    }, 1500);
 	  };
-
-	  function reset() {
-	    gifMap = new Map();
-	    _self.browsing = false;
-	    _self.gifs = [];
-	    _self.noresults = false;
-	  }
 
 	  function search(term) {
 	    _self.loading = true;
-	    var translatePromises = [],
+	    let translatePromises = [],
 	        resolveCount = 0;
-	    for (var i = 6; i > 0; i--) {
-	      var resultsPromise = translateResource.get({
+	    for (let i = 6; i > 0; i--) {
+	      let resultsPromise = translateResource.get({
 	        s: term
 	      }).$promise;
 
 	      translatePromises.push(resultsPromise);
 
-	      resultsPromise.then(function (resp) {
+	      resultsPromise.then(resp => {
 	        if (resp.data.images) {
-	          var dupeCheck = gifMap.get(resp.data.images.fixed_height_small.url);
+	          let dupeCheck = gifMap.get(resp.data.images.fixed_height_small.url);
 	          if (typeof dupeCheck === 'undefined') {
 	            resolveCount++;
 	            _self.gifs = _self.gifs.concat([resp.data.images.fixed_height_small.url]);
 	            gifMap.set(resp.data.images.fixed_height_small.url, resp.data.images.original.url);
 	          }
 	        }
-	      }, function (err) {
-	        _self.error = 'Problem contacting Giphy, Please Try Again'; //TODO: i18n THIS
+	      }, err => {
+	        _self.error = 'Problem contacting Giphy, Please Try Again'; // TODO: i18n THIS
 	      });
 	    }
 
-	    $q.all(translatePromises)['finally'](function () {
+	    $q.all(translatePromises).finally(() => {
 	      if (resolveCount === 0) {
 	        _self.noresults = true;
 	      } else {
 	        _self.noresults = false;
 	      }
-	      for (var j = 6 - resolveCount; j > 0; j--) {
+	      for (let j = 6 - resolveCount; j > 0; j--) {
 	        _self.gifs = _self.gifs.concat([PLACEHOLDER_IMAGE]);
 	      }
 
@@ -240,8 +212,7 @@
 	  }
 	});
 
-	exports['default'] = piApp;
-	module.exports = exports['default'];
+	module.exports = piApp;
 
 /***/ },
 /* 4 */
@@ -278,7 +249,7 @@
 
 
 	// module
-	exports.push([module.id, "body {\n  font-family: \"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif;\n  -webkit-app-region: drag;\n  background-color: #343838;\n  color: #FFF;\n  margin: 0px;\n  padding: 0px;\n  overflow: hidden; }\n\ninput {\n  border: 0;\n  color: #FFF;\n  font-size: 48px;\n  width: 550px;\n  text-align: center;\n  outline: none;\n  background-size: 125px; }\n\n.notice {\n  text-align: center;\n  position: relative; }\n\n.image-wrapper {\n  width: 200px;\n  height: 150px;\n  float: left;\n  overflow: hidden; }\n\nimg {\n  display: block;\n  margin: 0 auto;\n  max-width: 200px;\n  height: 100%; }\n\n.scene {\n  height: 200px;\n  width: 100%; }\n\n.loader {\n  height: 400px;\n  text-align: center;\n  vertical-align: middle;\n  width: 600px; }\n\n.loader img {\n  display: block;\n  margin: 0 auto;\n  max-width: 25px;\n  height: 25px; }\n\n.help--browsing {\n  position: fixed;\n  left: 0px;\n  top: 0px;\n  font-size: 12px;\n  opacity: 0.6; }\n\n.help {\n  position: fixed;\n  left: 20px;\n  top: 45px;\n  font-size: 12px;\n  opacity: 0.5; }\n", ""]);
+	exports.push([module.id, "body {\n  font-family: \"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif;\n  -webkit-app-region: drag;\n  background-color: #343838;\n  color: #FFF;\n  margin: 0px;\n  padding: 0px;\n  overflow: hidden; }\n\ninput {\n  border: 0;\n  color: #FFF;\n  font-size: 48px;\n  width: 550px;\n  text-align: center;\n  outline: none;\n  background-size: 125px; }\n\n.notice {\n  text-align: center;\n  position: relative; }\n\n.image-wrapper {\n  width: 200px;\n  height: 150px;\n  float: left;\n  overflow: hidden; }\n\nimg {\n  display: block;\n  margin: 0 auto;\n  max-width: 200px;\n  height: 100%; }\n\n.scene {\n  height: 200px;\n  width: 100%; }\n\n.loader {\n  height: 400px;\n  text-align: center;\n  vertical-align: middle;\n  width: 600px; }\n\n.loader img {\n  display: block;\n  margin: 0 auto;\n  max-width: 25px;\n  height: 25px; }\n\n.help--browsing {\n  position: fixed;\n  left: 0px;\n  top: 0px;\n  font-size: 12px;\n  opacity: 0.6; }\n\n.help--copy {\n  position: fixed;\n  right: 0px;\n  top: 0px;\n  font-size: 12px;\n  color: lime; }\n\n.help {\n  position: fixed;\n  left: 20px;\n  top: 45px;\n  font-size: 12px;\n  opacity: 0.5; }\n", ""]);
 
 	// exports
 
@@ -362,7 +333,8 @@
 			return document.head || document.getElementsByTagName("head")[0];
 		}),
 		singletonElement = null,
-		singletonCounter = 0;
+		singletonCounter = 0,
+		styleElementsInsertedAtTop = [];
 
 	module.exports = function(list, options) {
 		if(false) {
@@ -373,6 +345,9 @@
 		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
 		// tags it will allow on a page
 		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
+
+		// By default, add <style> tags to the bottom of <head>.
+		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
 
 		var styles = listToStyles(list);
 		addStylesToDom(styles, options);
@@ -440,19 +415,44 @@
 		return styles;
 	}
 
-	function createStyleElement() {
-		var styleElement = document.createElement("style");
+	function insertStyleElement(options, styleElement) {
 		var head = getHeadElement();
+		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
+		if (options.insertAt === "top") {
+			if(!lastStyleElementInsertedAtTop) {
+				head.insertBefore(styleElement, head.firstChild);
+			} else if(lastStyleElementInsertedAtTop.nextSibling) {
+				head.insertBefore(styleElement, lastStyleElementInsertedAtTop.nextSibling);
+			} else {
+				head.appendChild(styleElement);
+			}
+			styleElementsInsertedAtTop.push(styleElement);
+		} else if (options.insertAt === "bottom") {
+			head.appendChild(styleElement);
+		} else {
+			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+		}
+	}
+
+	function removeStyleElement(styleElement) {
+		styleElement.parentNode.removeChild(styleElement);
+		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
+		if(idx >= 0) {
+			styleElementsInsertedAtTop.splice(idx, 1);
+		}
+	}
+
+	function createStyleElement(options) {
+		var styleElement = document.createElement("style");
 		styleElement.type = "text/css";
-		head.appendChild(styleElement);
+		insertStyleElement(options, styleElement);
 		return styleElement;
 	}
 
-	function createLinkElement() {
+	function createLinkElement(options) {
 		var linkElement = document.createElement("link");
-		var head = getHeadElement();
 		linkElement.rel = "stylesheet";
-		head.appendChild(linkElement);
+		insertStyleElement(options, linkElement);
 		return linkElement;
 	}
 
@@ -461,7 +461,7 @@
 
 		if (options.singleton) {
 			var styleIndex = singletonCounter++;
-			styleElement = singletonElement || (singletonElement = createStyleElement());
+			styleElement = singletonElement || (singletonElement = createStyleElement(options));
 			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
 			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
 		} else if(obj.sourceMap &&
@@ -470,18 +470,18 @@
 			typeof URL.revokeObjectURL === "function" &&
 			typeof Blob === "function" &&
 			typeof btoa === "function") {
-			styleElement = createLinkElement();
+			styleElement = createLinkElement(options);
 			update = updateLink.bind(null, styleElement);
 			remove = function() {
-				styleElement.parentNode.removeChild(styleElement);
+				removeStyleElement(styleElement);
 				if(styleElement.href)
 					URL.revokeObjectURL(styleElement.href);
 			};
 		} else {
-			styleElement = createStyleElement();
+			styleElement = createStyleElement(options);
 			update = applyToTag.bind(null, styleElement);
 			remove = function() {
-				styleElement.parentNode.removeChild(styleElement);
+				removeStyleElement(styleElement);
 			};
 		}
 
@@ -527,7 +527,6 @@
 	function applyToTag(styleElement, obj) {
 		var css = obj.css;
 		var media = obj.media;
-		var sourceMap = obj.sourceMap;
 
 		if(media) {
 			styleElement.setAttribute("media", media)
@@ -545,7 +544,6 @@
 
 	function updateLink(linkElement, obj) {
 		var css = obj.css;
-		var media = obj.media;
 		var sourceMap = obj.sourceMap;
 
 		if(sourceMap) {

@@ -1,55 +1,53 @@
 
-var gui = require('nw.gui');
-var version = gui.App.manifest.version;
-var win = gui.Window.get();
+var version = nw.App.manifest.version;
+var win = nw.Window.get();
 
-var tray = new gui.Tray(
+var tray = new nw.Tray(
   {
     icon: 'tray.png',
     iconsAreTemplates: false
   });
 
-var menu = new gui.Menu();
+var menu = new nw.Menu();
 
-menu.append(new gui.MenuItem(
+menu.append(new nw.MenuItem(
   {
     label: 'Gif Cake'
   }));
 
-menu.append(new gui.MenuItem(
+menu.append(new nw.MenuItem(
   {
     type: 'separator'
   }));
 
-menu.append(new gui.MenuItem(
+menu.append(new nw.MenuItem(
   {
     label: 'v' + version
   }));
 
-
-menu.append(new gui.MenuItem(
+menu.append(new nw.MenuItem(
   {
     type: 'separator'
   }));
 
-menu.append(new gui.MenuItem(
+menu.append(new nw.MenuItem(
   {
     label: 'Exit',
     click: function () {
-      gui.App.quit();
-    },
+      nw.App.quit();
+    }
   }));
 
 tray.menu = menu;
 
 var option = {
-  key: 'Ctrl+Alt+G',
+  key: 'Command+Alt+G',
   active: function () {
     win.show();
 
     setTimeout(function () {
       win.focus();
-      $('#term').focus();
+     // $('#term').focus();
     }, 0);
   },
   failed: function (e) {
@@ -57,6 +55,6 @@ var option = {
   }
 };
 
-var shortcut = new gui.Shortcut(option);
+var shortcut = new nw.Shortcut(option);
 
-gui.App.registerGlobalHotKey(shortcut);
+nw.App.registerGlobalHotKey(shortcut);

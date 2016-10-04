@@ -1,6 +1,6 @@
-import './resources';
-import './search';
-import './style.scss';
+require('./resources');
+require('./search');
+require('./style.scss');
 
 var app = angular.module('pi', ['pi.search', 'pi.resources']);
 
@@ -20,5 +20,3 @@ app.directive('drFocus', function ($timeout) {
     }
   };
 });
-
-export default app;
