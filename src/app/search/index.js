@@ -4,7 +4,8 @@ var piApp = angular.module('pi.search', []);
 
 piApp.controller('SearchCtrl', function (translateResource, $q, $scope, $timeout) {
   var _self = this;
-  const PLACEHOLDER_IMAGE = 'https://placeholdit.imgix.net/~text?txtsize=33&txt=No%20Result&w=200&h=150';
+  const images = require('../resources/images.json');
+  const PLACEHOLDER_IMAGE = images.notFound;
   var gifMap = new Map();
   this.browsing = false;
   this.loading = true;
@@ -60,7 +61,7 @@ piApp.controller('SearchCtrl', function (translateResource, $q, $scope, $timeout
         }
         break;
       default:
-        if (this.browsing === true && /[a-zA-Z0-9-_ ]/.test(e.key)) {
+        if (this.browsing === true && /^[a-zA-Z0-9-_ ]$/.test(e.key)) {
           reset(e.key);
         }
     }
