@@ -1,0 +1,14 @@
+{
+  "name": "token",
+  "version": "0.0.0",
+  "description": "NAPI token",
+  "main": "token.js",
+  "private": true,
+  "dependencies": {
+    "bindings": "~1.2.1"
+  },
+  "scripts": {
+    "test": "node token.js"
+  },
+  "gypfile": true
+}
