@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Tray, Menu } = require('electron');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -23,6 +23,7 @@ const createWindow = () => {
     width: 600,
     height: 300,
     frame: false,
+    icon: __dirname + '/src/assets/logo.icns',
     webPreferences: {
       nodeIntegration: true
     }
@@ -35,6 +36,14 @@ const createWindow = () => {
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+
+  tray = new Tray('./src/assets/tray.png')
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Quit', type: 'normal', role: 'quit' }
+  ])
+  tray.setToolTip('Gif Cake')
+  tray.setContextMenu(contextMenu)
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
