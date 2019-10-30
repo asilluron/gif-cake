@@ -8,8 +8,12 @@ import {
   LinearProgress
 } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import GridList from "@material-ui/core/GridList";
 import useAxios from "axios-hooks";
+const {clipboard} = require('electron');
+import {cloneDeep} from 'lodash';
+
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,7 +44,8 @@ const useStyles = makeStyles(theme => ({
 interface ITile {
     images: any
     title: string
-    source_tld: string
+    source_tld: string,
+    copied: boolean
 }
 
 interface IProps {
@@ -52,6 +57,7 @@ interface IProps {
 const Results = ({ term, inputRef, setTerm, showGifs}: IProps) => {
   const classes = useStyles();
   let tileData = [];
+  let srcToData:any = {};
   const [results, setResults] = useState<any>([])
   const [fetched, setFetched] = useState(false);
   const [page, setPage] = useState(0);
@@ -92,8 +98,26 @@ const Results = ({ term, inputRef, setTerm, showGifs}: IProps) => {
         setTerm(e.key);
         
     }
-    
 };
+
+  const handleClick = (e:any) => {
+    // @ts-ignore
+    if (typeof e.target.src !== "undefined") {
+        const content = srcToData[e.target.src]
+        clipboard.writeText(content.fullSize);
+        const resultsClone = cloneDeep(results);
+        const newResults = resultsClone.map((r:any) => {
+          if(r.images.fixed_width_downsampled.url === content.img) {
+            r.copied = true;
+          } else {
+            r.copied = false;
+          }
+          return r;
+        })
+        setResults(newResults);
+    }
+  }
+
 
   useEffect(() => {
         document.addEventListener("keydown", handleKeyPress, true);
@@ -110,12 +134,20 @@ const Results = ({ term, inputRef, setTerm, showGifs}: IProps) => {
   }
 
   for (let i = (page * 6); i < Math.min(results.length, (page + 1) * 6); i++) {
-    tileData.push({
-      img: results[i].images.fixed_width_downsampled.url,
+    const smallSource = results[i].images.fixed_width_downsampled.url;
+
+    const tileElemData = {
+      img: smallSource,
+      copied: results[i].copied ? true : false,
       title: results[i].title,
       author: results[i].source_tld,
       fullSize: results[i].images.original.url
-    });
+    };
+
+
+    tileData.push(tileElemData);
+
+    srcToData[smallSource] = tileElemData;
   }
 
   if (error) {
@@ -123,22 +155,22 @@ const Results = ({ term, inputRef, setTerm, showGifs}: IProps) => {
   }
 
   return (
-    <GridList cellHeight={180} className={classes.gridList}>
-      {tileData.map(tile => (
+    <GridList   onClick={ (e) => { handleClick(e) }} cellHeight={180} className={classes.gridList}>
+      {tileData.map((tile, index) => (
         <GridListTile
           style={{ height: "150px", width: "200px" }}
           key={tile.img}
         >
-          <img src={tile.img} alt={tile.title} />
+          <img data-index={index} src={tile.img} alt={tile.title} />
           <GridListTileBar
-            title={tile.title}
+            title={tile.copied ? 'Copied' : tile.title}
             subtitle={<span>by: {tile.author}</span>}
             actionIcon={
               <IconButton
                 aria-label={`info about ${tile.title}`}
                 className={classes.icon}
               >
-                <InfoIcon />
+                {tile.copied ? <AssignmentTurnedInIcon color="primary"/> : <InfoIcon />}
               </IconButton>
             }
           />
