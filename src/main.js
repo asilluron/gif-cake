@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu } = require('electron');
+const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage} = require('electron');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -6,11 +6,18 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 
+const path = require('path');
+var iconPath = path.join(__dirname, '/assets/tray.png')
+let trayIcon = nativeImage.createFromPath(iconPath);
+var tokenNative = require('./token.node');
+var logoPath = path.join(__dirname, '/assets/logo.icns')
+let firstBlur = true;
+/** 
 require('update-electron-app')({
-  repo: 'asilluron/gif-cake-2',
+  repo: 'asilluron/gif-cake',
   updateInterval: '1 hour',
   logger: require('electron-log')
-})
+})*/
 
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -23,27 +30,45 @@ const createWindow = () => {
     width: 600,
     height: 300,
     frame: false,
-    icon: __dirname + '/src/assets/logo.icns',
+    resizable: false,
+    icon: logoPath,
     webPreferences: {
       nodeIntegration: true
     }
   });
 
 
-  var addon = require('bindings')('../token/build/Release/token.node');
+  global.token = tokenNative.token();
 
-  global.token = addon.token();
+
+  globalShortcut.register('CommandOrControl+Alt+G', () => {
+    mainWindow.show();
+  })
+
+  globalShortcut.register('Esc', () => {
+    mainWindow.hide();
+  })
+
+  mainWindow.on('blur', () => {
+    if(firstBlur) {
+      firstBlur = false;
+    } else {
+      mainWindow.hide();
+    }
+  });
+
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-  tray = new Tray('./src/assets/tray.png')
+  tray = new Tray(trayIcon)
 
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Quit', type: 'normal', role: 'quit' }
   ])
   tray.setToolTip('Gif Cake')
   tray.setContextMenu(contextMenu)
+  
+  app.dock.hide()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -58,7 +83,6 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
-
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
   // On OS X it is common for applications and their menu bar
@@ -67,6 +91,8 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+
 
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the

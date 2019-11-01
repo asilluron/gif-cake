@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import {
   TextField,
@@ -42,7 +42,6 @@ const SearchPanel = () => {
   const [displayGifs, showGifs] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [inputRef, setInputRef] = useState<any>(null);
-  const flagOnce = true;
   const _handleInput = (e: any) => {    
     if (e.key === "Enter") {
       showGifs(true);

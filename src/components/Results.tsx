@@ -1,7 +1,6 @@
 import React, { useState, useEffect} from "react";
 import { makeStyles } from "@material-ui/styles";
 import {
-  TextField,
   GridListTile,
   GridListTileBar,
   IconButton,
@@ -13,6 +12,9 @@ import GridList from "@material-ui/core/GridList";
 import useAxios from "axios-hooks";
 const {clipboard} = require('electron');
 import {cloneDeep} from 'lodash';
+var remote = require('electron').remote;   
+const token = remote.getGlobal('token');
+
 
 
 const useStyles = makeStyles(theme => ({
@@ -61,8 +63,6 @@ const Results = ({ term, inputRef, setTerm, showGifs}: IProps) => {
   const [results, setResults] = useState<any>([])
   const [fetched, setFetched] = useState(false);
   const [page, setPage] = useState(0);
-  var remote = require('electron').remote;   
-  const token = remote.getGlobal('token');
   const [{ data, loading, error }, refetch] = useAxios(
     `https://api.giphy.com/v1/gifs/search?api_key=${token}&q=${term}`
   );

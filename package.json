@@ -1,13 +1,14 @@
 {
-  "name": "gif-cake-2",
-  "productName": "gif-cake-2",
+  "name": "gif-cake",
+  "productName": "gif-cake",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "The best gif desktop utility",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make",
+    "rebuild": "electron-rebuild -f -w token",
+    "make": "electron-forge make --debug",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\""
   },
@@ -18,54 +19,10 @@
   },
   "license": "MIT",
   "config": {
-    "forge": {
-      "electronPackagerConfig": { 
-        "icon": "./src/assets/logo.icns"
-      },
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "gif_cake_2"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ],
-      "plugins": [
-        [
-          "@electron-forge/plugin-webpack",
-          {
-            "mainConfig": "./webpack.main.config.js",
-            "renderer": {
-              "config": "./webpack.renderer.config.js",
-              "entryPoints": [
-                {
-                  "html": "./src/index.html",
-                  "js": "./src/App.tsx",
-                  "name": "main_window"
-                }
-              ]
-            }
-          }
-        ]
-      ]
-    }
+    "forge": "./config.forge.js"
   },
   "dependencies": {
+    "@electron-forge/maker-dmg": "^6.0.0-beta.45",
     "@material-ui/core": "^4.5.2",
     "@material-ui/icons": "^4.5.1",
     "@material-ui/styles": "^4.5.2",
@@ -77,6 +34,7 @@
     "axios-hooks": "^1.6.0",
     "bindings": "^1.5.0",
     "electron-log": "^3.0.8",
+    "electron-packager": "^14.1.0",
     "electron-squirrel-startup": "^1.0.0",
     "fork-ts-checker-webpack-plugin": "^3.0.1",
     "lodash": "^4.17.15",
@@ -96,6 +54,7 @@
     "babel-loader": "^8.0.6",
     "css-loader": "^3.0.0",
     "electron": "7.0.0",
+    "electron-rebuild": "^1.8.6",
     "node-loader": "^0.6.0",
     "style-loader": "^0.23.1",
     "ts-loader": "^6.2.1"
