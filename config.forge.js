@@ -1,7 +1,15 @@
+config = {
+  icon: 'assets/icons/icon.icns',
+}
+
+config.ignore = (file) => {
+  if (!file) return false;
+
+  return !/^[/\\]\.webpack($|[/\\]).*$/.test(file);
+}
+
 module.exports = {
-  packagerConfig: {
-    icon: 'assets/icons/icon.icns'
-  },
+  packagerConfig: config,
   makers: [
     {
       name: "@electron-forge/maker-dmg",
@@ -12,7 +20,7 @@ module.exports = {
         additionalDMGOptions: {
           "code-sign": {
             "identifier": "com.silluron.gifcake",
-            "signing-identity": "REPLACE"
+            "signing-identity": "02B0BFD2DEDD6F7DE2E912C723267ED7521BF88E"
           }
         }
       }

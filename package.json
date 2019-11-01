@@ -57,6 +57,7 @@
     "electron-rebuild": "^1.8.6",
     "node-loader": "^0.6.0",
     "style-loader": "^0.23.1",
-    "ts-loader": "^6.2.1"
+    "ts-loader": "^6.2.1",
+    "url-loader": "^2.2.0"
   }
 }

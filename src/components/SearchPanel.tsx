@@ -4,6 +4,8 @@ import {
   TextField,
 } from "@material-ui/core";
 import {Results} from './Results';
+// @ts-ignore
+import image_src from '../assets/giphy.png';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -34,6 +36,14 @@ const useStyles = makeStyles(theme => ({
   },
   icon: {
     color: "rgba(255, 255, 255, 0.54)"
+  },
+  giphy: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    zIndex: 100,
+    height: "18px",
+    width: "140px"
   }
 }));
 
@@ -50,7 +60,6 @@ const SearchPanel = () => {
 
   const handleChange = (e: any) => {
       if(displayGifs === true) {
-        console.log('CLEARING SLATE')
         showGifs(false);
         setSearchTerm('');
         const val = e.target.value;
@@ -88,6 +97,9 @@ const SearchPanel = () => {
       {displayGifs ? (
         <Results term={searchTerm} inputRef={inputRef} setTerm={setSearchTerm} showGifs={showGifs}></Results>
       ) : null}
+
+      <img src={image_src}  className={classes.giphy} alt="Powered by Giphy" />
+     
     </div>
   );
 };
