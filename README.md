@@ -27,3 +27,6 @@ Click on a gif image
 ``` nvm install ```
 ``` cd token ```
 ``` npm install ```
+
+### Publishing
+``` npm run make ```

@@ -12,8 +12,8 @@ import GridList from "@material-ui/core/GridList";
 import useAxios from "axios-hooks";
 const {clipboard} = require('electron');
 import {cloneDeep} from 'lodash';
-var remote = require('electron').remote;   
-const token = remote.getGlobal('token');
+//var remote = require('electron').remote;   
+//const token = remote.getGlobal('token');
 
 
 
@@ -64,7 +64,7 @@ const Results = ({ term, inputRef, setTerm, showGifs}: IProps) => {
   const [fetched, setFetched] = useState(false);
   const [page, setPage] = useState(0);
   const [{ data, loading, error }, refetch] = useAxios(
-    `https://api.giphy.com/v1/gifs/search?api_key=${token}&q=${term}`
+    `https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${term}`
   );
 
   const handleKeyPress = (e:any) => {

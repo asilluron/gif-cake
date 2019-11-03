@@ -9,7 +9,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 const path = require('path');
 var iconPath = path.join(__dirname, '/assets/tray.png')
 let trayIcon = nativeImage.createFromPath(iconPath);
-var tokenNative = require('./token.node');
+//var tokenNative = require('./token.node');
 var logoPath = path.join(__dirname, '/assets/logo.icns')
 let firstBlur = true;
 /** 
@@ -38,7 +38,7 @@ const createWindow = () => {
   });
 
 
-  global.token = tokenNative.token();
+  //global.token = tokenNative.token();
 
 
   globalShortcut.register('CommandOrControl+Alt+G', () => {
