@@ -21,6 +21,11 @@ const useStyles = makeStyles(theme => ({
   root: {
     padding: 0
   },
+  gifImage: {
+    objectFit: 'contain',
+    height: "150px",
+    width: "200px"
+  },
   searchBar: {
     border: 0,
     color: "white",
@@ -161,7 +166,7 @@ const Results = ({ term, inputRef, setTerm, showGifs}: IProps) => {
           style={{ height: "150px", width: "200px" }}
           key={tile.img}
         >
-          <img data-index={index} src={tile.img} alt={tile.title} />
+          <img className={classes.gifImage} data-index={index} src={tile.img} alt={tile.title} />
           <GridListTileBar
             title={tile.copied ? 'Copied' : tile.title}
             subtitle={<span>by: {tile.author}</span>}
