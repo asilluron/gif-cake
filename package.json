@@ -1,16 +1,18 @@
 {
   "name": "gif-cake",
-  "productName": "gif-cake",
+  "productName": "GifCake",
   "version": "1.0.0",
   "description": "The best gif desktop utility",
-  "main": ".webpack/main",
+  "main": "app/main/index.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
     "rebuild": "electron-rebuild -f -w token",
     "make": "electron-forge make --debug",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "lint": "echo \"No linting configured\"",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "keywords": [],
   "author": {
@@ -18,8 +20,25 @@
     "email": "asilluron@users.noreply.github.com"
   },
   "license": "MIT",
-  "config": {
+  "configIGNORE": {
     "forge": "./config.forge.js"
+  },
+  "dmg": {
+    "sign": false
+  },
+  "build": {
+    "afterSign": "scripts/notarize.js",
+    "dmg": {
+      "sign": false
+    },
+    "files": ["build/tray.png"]
+  },
+  "buildVersion": "1.0.0",
+    "mac": {
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.plist"
   },
   "dependencies": {
     "@electron-forge/maker-dmg": "^6.0.0-beta.45",
@@ -46,6 +65,9 @@
   "devDependencies": {
     "@electron-forge/cli": "6.0.0-beta.45",
     "@electron-forge/maker-deb": "6.0.0-beta.45",
+    "electron-builder": "^22.1.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "friendly-errors-webpack-plugin": "^1.7.0",
     "@electron-forge/maker-rpm": "6.0.0-beta.45",
     "@electron-forge/maker-squirrel": "6.0.0-beta.45",
     "@electron-forge/maker-zip": "6.0.0-beta.45",

@@ -8,6 +8,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 
 const path = require('path');
 var iconPath = path.join(__dirname, '/assets/tray.png')
+
 let trayIcon = nativeImage.createFromPath(iconPath);
 //var tokenNative = require('./token.node');
 var logoPath = path.join(__dirname, '/assets/logo.icns')
@@ -60,7 +61,9 @@ const createWindow = () => {
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-  tray = new Tray(trayIcon)
+  tray = new Tray(__dirname + nativeImage.createFromPath('./build/tray.png'))
+
+
 
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Quit', type: 'normal', role: 'quit' }
