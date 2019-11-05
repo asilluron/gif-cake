@@ -5,3 +5,9 @@ module.exports = [
     async: false
   })
 ];
+
+/** 
+plugins: [
+  new FriendlyErrorsWebpackPlugin({ clearConsole: env === "development" })
+]
+**/

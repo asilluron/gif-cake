@@ -1,5 +1,7 @@
 config = {
   icon: 'assets/icons/icon.icns',
+  appBundleId: 'com.silluron.gifcake',
+  osxSign: true
 }
 
 config.ignore = (file) => {
@@ -9,21 +11,25 @@ config.ignore = (file) => {
 }
 
 module.exports = {
+  buildIdentifier: 'com.silluron.gifcake',
   packagerConfig: config,
+  "mac": {
+    "hardenedRuntime": true
+  },
   makers: [
     {
       name: "@electron-forge/maker-dmg",
       config: {
         background: './assets/dmg-background.png',
         format: "ULFO",
-        icon: './assets/icons/icon.icns',
-        additionalDMGOptions: {
-          "code-sign": {
-            "identifier": "com.silluron.gifcake",
-            "signing-identity": "02B0BFD2DEDD6F7DE2E912C723267ED7521BF88E"
-          }
-        }
+        icon: './assets/icons/icon.icns'       
       }
+    },
+    {
+      "name": "@electron-forge/maker-zip",
+      "platforms": [
+        "darwin"
+      ]
     }
   ],
   plugins: [
