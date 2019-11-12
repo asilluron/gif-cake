@@ -14,6 +14,9 @@ module.exports = env => {
       rules: require('./webpack.rules'),
     },
     resolve: {
+      alias: {
+        react: path.resolve('./node_modules/react')
+      },
       extensions: ['.js', '.ts', '.jsx', '.tsx', '.css']
       },
   });

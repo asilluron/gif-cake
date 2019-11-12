@@ -48,12 +48,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-interface ITile {
-    images: any
-    title: string
-    source_tld: string,
-    copied: boolean
-}
 
 interface IProps {
   term: string
@@ -68,7 +62,7 @@ const Results = ({ term, inputRef, setTerm, showGifs}: IProps) => {
   const [results, setResults] = useState<any>([])
   const [fetched, setFetched] = useState(false);
   const [page, setPage] = useState(0);
-  const [{ data, loading, error }, refetch] = useAxios(
+  const [{ data, loading, error }] = useAxios(
     `https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${term}`
   );
 

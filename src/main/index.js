@@ -1,10 +1,12 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage} = require('electron');
-const url = require("url");
 const path = require("path")
+import { format as formatUrl } from 'url'
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
   app.quit();
 }
+const isDevelopment = process.env.NODE_ENV !== 'production'
 
 let firstBlur = true;
  
@@ -53,14 +55,18 @@ const createWindow = () => {
     }
   });
 
+  if (isDevelopment) {
+    mainWindow.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
+  }
+  else {
+    mainWindow.loadURL(formatUrl({
+      pathname: path.join(__dirname, 'index.html'),
+      protocol: 'file',
+      slashes: true
+    }))
+  }
 
-  // and load the index.html of the app.
-  mainWindow.loadURL( url.format({
-    pathname: path.join(__dirname, "app.html"),
-    protocol: "file:",
-    slashes: true
-  }));
-  tray = new Tray('./src/assets/tray.png');
+  const tray = new Tray('./src/assets/tray.png');
 
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Quit', type: 'normal', role: 'quit' }
@@ -70,7 +76,6 @@ const createWindow = () => {
   
   app.dock.hide()
 
-  require('./App.tsx');
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
