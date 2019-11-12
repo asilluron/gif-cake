@@ -5,7 +5,7 @@ import {
 } from "@material-ui/core";
 import {Results} from './Results';
 // @ts-ignore
-import image_src from '../assets/giphy.png';
+import image_src from '../../assets/giphy.png';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -13,7 +13,7 @@ const useStyles = makeStyles(theme => ({
   },
   searchBar: {
     border: 0,
-    color: "white",
+    color: "orange",
     fontSize: 48,
     width: '600px',
     textAlign: "center",

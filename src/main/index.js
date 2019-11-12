@@ -1,23 +1,24 @@
-const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage} = require('electron');
-
+const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage } = require('electron');
+const path = require("path")
+import { format as formatUrl } from 'url'
+var tray;
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
   app.quit();
 }
 
+const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const path = require('path');
-var iconPath = path.join(__dirname, '/assets/tray.png')
-let trayIcon = nativeImage.createFromPath(iconPath);
-//var tokenNative = require('./token.node');
-var logoPath = path.join(__dirname, '/assets/logo.icns')
+
 let firstBlur = true;
-/** 
-require('update-electron-app')({
+ 
+/** require('update-electron-app')({
   repo: 'asilluron/gif-cake',
   updateInterval: '1 hour',
   logger: require('electron-log')
-})*/
+})
+
+*/
 
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -31,7 +32,6 @@ const createWindow = () => {
     height: 300,
     frame: false,
     resizable: false,
-    icon: logoPath,
     webPreferences: {
       nodeIntegration: true
     }
@@ -45,11 +45,9 @@ const createWindow = () => {
     mainWindow.show();
   })
 
-  globalShortcut.register('Esc', () => {
-    mainWindow.hide();
-  })
-
+  
   mainWindow.on('blur', () => {
+    globalShortcut.unregister('Esc')
     if(firstBlur) {
       firstBlur = false;
     } else {
@@ -57,18 +55,45 @@ const createWindow = () => {
     }
   });
 
+  mainWindow.on('focus', () => {
+    globalShortcut.register('Esc', () => {
+      mainWindow.hide();
+    })
+  });
 
-  // and load the index.html of the app.
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-  tray = new Tray(trayIcon)
+  if (isDevelopment) {
+    mainWindow.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
+  }
+  else {
+    mainWindow.loadURL(formatUrl({
+      pathname: path.join(__dirname, 'index.html'),
+      protocol: 'file',
+      slashes: true
+    }))
+  }
+
+
+  let trayPath = '';
+  if(isDevelopment) {
+    trayPath = path.join(path.dirname(__dirname), 'assets','tray.png');
+    tray = new Tray(trayPath);
+  } else {
+
+      trayPath = path.join(path.dirname(__dirname), 'extraResources','tray.png');
+  }
+
+  tray = new Tray(trayPath);
 
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Quit', type: 'normal', role: 'quit' }
   ])
+
+
   tray.setToolTip('Gif Cake')
   tray.setContextMenu(contextMenu)
   
   app.dock.hide()
+
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
