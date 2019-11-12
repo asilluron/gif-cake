@@ -1,12 +1,14 @@
-const { app, BrowserWindow, Tray, Menu, globalShortcut, MenuItem } = require('electron');
+const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage } = require('electron');
 const path = require("path")
 import { format as formatUrl } from 'url'
-
+var tray;
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
   app.quit();
 }
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
 
 let firstBlur = true;
  
@@ -70,8 +72,17 @@ const createWindow = () => {
     }))
   }
 
-  
-  const tray = new Tray(path.join(__dirname, 'assets/tray.png'));
+
+  let trayPath = '';
+  if(isDevelopment) {
+    trayPath = path.join(path.dirname(__dirname), 'assets','tray.png');
+    tray = new Tray(trayPath);
+  } else {
+
+      trayPath = path.join(path.dirname(__dirname), 'extraResources','tray.png');
+  }
+
+  tray = new Tray(trayPath);
 
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Quit', type: 'normal', role: 'quit' }
