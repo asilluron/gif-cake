@@ -4,7 +4,7 @@ const base = require("./webpack.base.config");
 module.exports = env => {
   return merge(base(env), {
     entry: {
-      app: "./src/main.js"
+      app: "./src/main/index.js"
     },
     output: {
       filename: "[name].js",
@@ -14,9 +14,6 @@ module.exports = env => {
       rules: require('./webpack.rules'),
     },
     resolve: {
-      alias: {
-        react: path.resolve('./node_modules/react')
-      },
       extensions: ['.js', '.ts', '.jsx', '.tsx', '.css']
       },
   });

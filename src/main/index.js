@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage} = require('electron');
+const { app, BrowserWindow, Tray, Menu, globalShortcut, MenuItem } = require('electron');
 const path = require("path")
 import { format as formatUrl } from 'url'
 
@@ -43,16 +43,20 @@ const createWindow = () => {
     mainWindow.show();
   })
 
-  globalShortcut.register('Esc', () => {
-    mainWindow.hide();
-  })
-
+  
   mainWindow.on('blur', () => {
+    globalShortcut.unregister('Esc')
     if(firstBlur) {
       firstBlur = false;
     } else {
       mainWindow.hide();
     }
+  });
+
+  mainWindow.on('focus', () => {
+    globalShortcut.register('Esc', () => {
+      mainWindow.hide();
+    })
   });
 
   if (isDevelopment) {
@@ -66,11 +70,14 @@ const createWindow = () => {
     }))
   }
 
-  const tray = new Tray('./src/assets/tray.png');
+  
+  const tray = new Tray(path.join(__dirname, 'assets/tray.png'));
 
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Quit', type: 'normal', role: 'quit' }
   ])
+
+
   tray.setToolTip('Gif Cake')
   tray.setContextMenu(contextMenu)
   

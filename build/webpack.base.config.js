@@ -19,16 +19,12 @@ module.exports = env => {
     },
     externals: [nodeExternals()],
     resolve: {
-        alias: {
-          react: path.resolve('./node_modules/react'),
-        },
       alias: {
         env: path.resolve(__dirname, `../config/env_${env}.json`)
       }
     },
     plugins: [
         new FriendlyErrorsWebpackPlugin({ clearConsole: env === "development" })
-      ],
-    devtool: "source-map"
+      ]
   };
 };
