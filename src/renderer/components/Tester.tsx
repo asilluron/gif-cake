@@ -1,44 +1,39 @@
-import React, {useState} from 'react'
-import {
-  TextField,
-} from "@material-ui/core";
+import React, { useState } from 'react';
+import { TextField } from "@mui/material";
 
-
-const Tester = () => { 
+const Tester = () => {
   const [displayGifs, showGifs] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [inputRef, setInputRef] = useState<any>(null);
-  const handleChange = (e:any) => {
-    console.log(e, inputRef)
-    setSearchTerm('')
-    setInputRef('')
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e);
+    setSearchTerm('');
     console.log(displayGifs);
-  }
-  const _handleInput = (e: any) => {    
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       showGifs(true);
     }
   };
-  
 
-
-
-    return (
-      <div id="panel">
-        
-        <TextField
-          onChange={e => handleChange(e)}
-          value={searchTerm}
-          onKeyPress={e => _handleInput(e)}
-          inputProps={{ style: {textAlign: 'center', color: 'white', fontSize: 48} }}
-          type={"text"}
-          fullWidth={true}
-          autoFocus={true}
-        />
-       
-      </div>
-    );
-
-}
+  return (
+    <div id="panel">
+      <TextField
+        onChange={handleChange}
+        value={searchTerm}
+        onKeyDown={handleKeyDown}
+        slotProps={{
+          input: {
+            style: { textAlign: 'center', color: 'white', fontSize: 48 },
+          },
+        }}
+        type="text"
+        fullWidth
+        autoFocus
+      />
+    </div>
+  );
+};
 
 export { Tester };

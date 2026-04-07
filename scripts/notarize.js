@@ -1,19 +1,5 @@
-require('dotenv').config();
-const { notarize } = require('electron-notarize');
-
-exports.default = async function notarizing(context) {
-  const { electronPlatformName, appOutDir } = context;  
-  if (electronPlatformName !== 'darwin') {
-    return;
-  }
-
-  const appName = context.packager.appInfo.productFilename;
-
-  return await notarize({
-    appBundleId: 'com.silluron.gifcake',
-    appPath: `${appOutDir}/${appName}.app`,
-    appleId: process.env.APPLEID,
-    appleIdPassword: process.env.APPLEIDPASS,
-    ascProvider: process.env.ASCPROVIDER,
-  });
-};
+// Notarization is now handled by Electron Forge's packagerConfig.osxNotarize
+// in forge.config.js. This file is kept for reference only.
+//
+// Set environment variables APPLEID, APPLEIDPASS, and ASCPROVIDER
+// to enable notarization during `npm run make`.

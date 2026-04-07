@@ -1,144 +1,98 @@
-import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/styles";
+import React, { useState, useEffect, useCallback, type RefObject } from "react";
 import {
-  GridListTile,
-  GridListTileBar,
   IconButton,
   LinearProgress,
-} from "@material-ui/core";
-import InfoIcon from "@material-ui/icons/Info";
-import AssignmentTurnedInIcon from "@material-ui/icons/AssignmentTurnedIn";
-import GridList from "@material-ui/core/GridList";
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
+} from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import useAxios from "axios-hooks";
-const { clipboard } = require("electron");
 import { cloneDeep } from "lodash";
-//var remote = require('electron').remote;
-//const token = remote.getGlobal('token');
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    padding: 0,
-  },
-  gifImage: {
-    objectFit: "contain",
-    height: "150px",
-    width: "200px",
-  },
-  searchBar: {
-    border: 0,
-    color: "white",
-    fontSize: 48,
-    width: 600,
-    textAlign: "center",
-    outline: "none",
-    backgroundSize: 125,
-  },
-  inputStyle: {
-    fontFamily: "Lucida Sans Unicode, Lucida Grande, sans-serif",
-    color: "white",
-  },
-  gridList: {
-    width: 600,
-    height: 300,
-  },
-  icon: {
-    color: "rgba(255, 255, 255, 0.54)",
-  },
-}));
 
 interface IProps {
   term: string;
-  inputRef: any;
-  setTerm: Function;
-  showGifs: Function;
+  inputRef: RefObject<HTMLInputElement | null>;
+  setTerm: (term: string) => void;
+  showGifs: (show: boolean) => void;
 }
+
 const Results = ({ term, inputRef, setTerm, showGifs }: IProps) => {
-  const classes = useStyles();
-  let tileData = [];
-  let srcToData: any = {};
-  const [results, setResults] = useState<any>([]);
+  const tileData: Array<{ img: string; copied: boolean; title: string; author: string; fullSize: string }> = [];
+  const srcToData: Record<string, { img: string; fullSize: string }> = {};
+  const [results, setResults] = useState<any[]>([]);
   const [fetched, setFetched] = useState(false);
   const [page, setPage] = useState(0);
   const [{ data, loading, error }] = useAxios(
-    `https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_TOKEN}&q=${term}`
+    `https://api.giphy.com/v1/gifs/search?api_key=${import.meta.env.VITE_GIPHY_TOKEN}&q=${term}`
   );
 
-  const handleKeyPress = (e: any) => {
+  const handleKeyPress = useCallback((e: KeyboardEvent) => {
     e.stopPropagation();
     e.preventDefault();
     document.removeEventListener("keydown", handleKeyPress, true);
     if (e.key === "Backspace") {
-      const newPage = page - 1;
-      if (newPage >= 0) {
-        setPage(newPage);
-      } else {
-        setPage(page);
-      }
+      setPage((p) => Math.max(0, p - 1));
       return;
     }
     if (e.key === "Tab") {
-      const newPage = page + 1;
-      const newStartIndex = (page + 1) * 6;
-      if (newStartIndex < results.length) {
-        // Okay, we have enough to keep going
-        setPage(newPage);
-      } else {
-        setPage(page);
-      }
+      setPage((p) => {
+        const newStartIndex = (p + 1) * 6;
+        return newStartIndex < results.length ? p + 1 : p;
+      });
       return;
     }
 
     if (/^[a-zA-Z0-9-_ ]$/.test(e.key)) {
-      inputRef.focus();
+      inputRef.current?.focus();
       showGifs(false);
       setTerm(e.key);
     }
-  };
+  }, [results, inputRef, showGifs, setTerm]);
 
-  const handleClick = (e: any) => {
-    // @ts-ignore
-    if (typeof e.target.src !== "undefined") {
-      const content = srcToData[e.target.src];
-      clipboard.writeText(content.fullSize);
-      const resultsClone = cloneDeep(results);
-      const newResults = resultsClone.map((r: any) => {
-        if (r.images.fixed_width_downsampled.url === content.img) {
-          r.copied = true;
-        } else {
-          r.copied = false;
-        }
-        return r;
-      });
-      setResults(newResults);
+  const handleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLImageElement;
+    if (target.src) {
+      const content = srcToData[target.src];
+      if (content) {
+        window.electronAPI.copyToClipboard(content.fullSize);
+        const resultsClone = cloneDeep(results);
+        const newResults = resultsClone.map((r: any) => {
+          r.copied = r.images.fixed_width_downsampled.url === content.img;
+          return r;
+        });
+        setResults(newResults);
+      }
     }
   };
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress, true);
-  }, [page, results, term]);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress, true);
+    };
+  }, [handleKeyPress]);
 
   if (loading) {
-    return <LinearProgress variant="query" color="secondary" />;
+    return <LinearProgress color="secondary" />;
   }
 
-  if (data && fetched === false) {
+  if (data && !fetched) {
     setFetched(true);
     setResults(data.data);
   }
 
   for (let i = page * 6; i < Math.min(results.length, (page + 1) * 6); i++) {
     const smallSource = results[i].images.fixed_width_downsampled.url;
-
     const tileElemData = {
       img: smallSource,
-      copied: results[i].copied ? true : false,
+      copied: !!results[i].copied,
       title: results[i].title,
       author: results[i].source_tld,
       fullSize: results[i].images.original.url,
     };
-
     tileData.push(tileElemData);
-
     srcToData[smallSource] = tileElemData;
   }
 
@@ -147,31 +101,31 @@ const Results = ({ term, inputRef, setTerm, showGifs }: IProps) => {
   }
 
   return (
-    <GridList
-      onClick={(e) => {
-        handleClick(e);
-      }}
-      cellHeight={180}
-      className={classes.gridList}
+    <ImageList
+      onClick={handleClick}
+      sx={{ width: 600, height: 300 }}
+      cols={3}
+      rowHeight={150}
     >
       {tileData.map((tile, index) => (
-        <GridListTile
-          style={{ height: "150px", width: "200px" }}
+        <ImageListItem
+          sx={{ height: '150px', width: '200px' }}
           key={tile.img}
         >
           <img
-            className={classes.gifImage}
+            style={{ objectFit: 'contain', height: '150px', width: '200px' }}
             data-index={index}
             src={tile.img}
             alt={tile.title}
+            loading="lazy"
           />
-          <GridListTileBar
+          <ImageListItemBar
             title={tile.copied ? "Copied" : tile.title}
             subtitle={<span>by: {tile.author}</span>}
             actionIcon={
               <IconButton
                 aria-label={`info about ${tile.title}`}
-                className={classes.icon}
+                sx={{ color: 'rgba(255, 255, 255, 0.54)' }}
               >
                 {tile.copied ? (
                   <AssignmentTurnedInIcon color="primary" />
@@ -181,9 +135,9 @@ const Results = ({ term, inputRef, setTerm, showGifs }: IProps) => {
               </IconButton>
             }
           />
-        </GridListTile>
+        </ImageListItem>
       ))}
-    </GridList>
+    </ImageList>
   );
 };
 

@@ -85,9 +85,15 @@ typings/
 # Webpack
 .webpack/
 
+# Vite
+.vite/
+
 # Electron-Forge
 out/
 
 token
 
 dist
+
+# Old bundled app
+app/app.js
